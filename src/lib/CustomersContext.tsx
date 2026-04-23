@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Customer, CustomerDraft } from './customers';
-import { createCustomer, loadCustomers, saveCustomers } from './customers';
+import { createCustomer, loadCustomers, migrateLegacyCustomers, saveCustomers } from './customers';
+import { useAuth } from './AuthContext';
 
 interface CustomersContextValue {
   customers: Customer[];
@@ -13,11 +14,29 @@ interface CustomersContextValue {
 const CustomersContext = createContext<CustomersContextValue | null>(null);
 
 export function CustomersProvider({ children }: { children: ReactNode }) {
-  const [customers, setCustomers] = useState<Customer[]>(() => loadCustomers());
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+
+  const [customers, setCustomers] = useState<Customer[]>(() => {
+    if (!userId) return [];
+    migrateLegacyCustomers(userId);
+    return loadCustomers(userId);
+  });
+
+  // Reload when the active user changes (sign-in, sign-out, account switch).
+  useEffect(() => {
+    if (!userId) {
+      setCustomers([]);
+      return;
+    }
+    migrateLegacyCustomers(userId);
+    setCustomers(loadCustomers(userId));
+  }, [userId]);
 
   useEffect(() => {
-    saveCustomers(customers);
-  }, [customers]);
+    if (!userId) return;
+    saveCustomers(userId, customers);
+  }, [customers, userId]);
 
   const addCustomer = useCallback((draft: CustomerDraft) => {
     const created = createCustomer(draft);

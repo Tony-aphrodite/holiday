@@ -13,11 +13,16 @@ export interface Customer {
 
 export type CustomerDraft = Omit<Customer, 'id' | 'createdAt'>;
 
-const STORAGE_KEY = 'holidaze.customers.v1';
+const LEGACY_KEY = 'holidaze.customers.v1';
+const STORAGE_PREFIX = 'holidaze.customers.v2.';
 
-export function loadCustomers(): Customer[] {
+function keyFor(userId: string): string {
+  return `${STORAGE_PREFIX}${userId}`;
+}
+
+export function loadCustomers(userId: string): Customer[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(keyFor(userId));
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -27,11 +32,26 @@ export function loadCustomers(): Customer[] {
   }
 }
 
-export function saveCustomers(list: Customer[]): void {
+export function saveCustomers(userId: string, list: Customer[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    localStorage.setItem(keyFor(userId), JSON.stringify(list));
   } catch {
     /* ignore quota errors */
+  }
+}
+
+// One-time migration: if the legacy global customer list exists and the
+// current user has no data yet, adopt it. This preserves the original
+// single-user dataset when the owner creates their first account.
+export function migrateLegacyCustomers(userId: string): void {
+  try {
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (!legacy) return;
+    if (localStorage.getItem(keyFor(userId))) return;
+    localStorage.setItem(keyFor(userId), legacy);
+    localStorage.removeItem(LEGACY_KEY);
+  } catch {
+    /* ignore */
   }
 }
 

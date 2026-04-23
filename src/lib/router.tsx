@@ -1,6 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 export type Route =
+  | { name: 'landing' }
+  | { name: 'login' }
+  | { name: 'signup' }
   | { name: 'dashboard' }
   | { name: 'customers' }
   | { name: 'customer'; id: string };
@@ -14,16 +17,25 @@ const RouterContext = createContext<RouterValue | null>(null);
 
 function parseHash(): Route {
   const h = window.location.hash.replace(/^#\/?/, '');
-  if (!h) return { name: 'dashboard' };
+  if (!h) return { name: 'landing' };
   const parts = h.split('/');
   if (parts[0] === 'customers' && parts[1]) return { name: 'customer', id: parts[1] };
   if (parts[0] === 'customers') return { name: 'customers' };
   if (parts[0] === 'dashboard') return { name: 'dashboard' };
-  return { name: 'dashboard' };
+  if (parts[0] === 'login') return { name: 'login' };
+  if (parts[0] === 'signup') return { name: 'signup' };
+  if (parts[0] === 'home' || parts[0] === 'landing') return { name: 'landing' };
+  return { name: 'landing' };
 }
 
 function serialize(route: Route): string {
   switch (route.name) {
+    case 'landing':
+      return '#/';
+    case 'login':
+      return '#/login';
+    case 'signup':
+      return '#/signup';
     case 'dashboard':
       return '#/dashboard';
     case 'customers':

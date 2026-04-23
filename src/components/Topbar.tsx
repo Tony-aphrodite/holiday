@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Search, Bell, Plus, ArrowRight } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Search, Bell, Plus, ArrowRight, LogOut, User as UserIcon } from 'lucide-react';
 import { useCustomers } from '../lib/CustomersContext';
 import { useRouter } from '../lib/router';
+import { useAuth } from '../lib/AuthContext';
 import { getCountries } from '../lib/holidays';
+import { initials } from '../lib/customers';
 import Avatar from './Avatar';
 
 interface TopbarProps {
@@ -109,11 +111,77 @@ export default function Topbar({ onAddCustomer }: TopbarProps) {
             <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-accent-rose" />
           </button>
 
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-accent-violet grid place-items-center text-xs font-semibold text-white">
-            RK
-          </div>
+          <UserMenu />
         </div>
       </div>
     </header>
+  );
+}
+
+function UserMenu() {
+  const { user, signOut } = useAuth();
+  const { navigate } = useRouter();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onDocClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [open]);
+
+  if (!user) return null;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-accent-violet grid place-items-center text-xs font-semibold text-white hover:ring-2 hover:ring-brand-500/40 transition"
+        aria-label="Account menu"
+      >
+        {initials(user.name)}
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-60 bg-bg-card border border-border rounded-xl shadow-card overflow-hidden animate-slide-up z-30">
+          <div className="px-4 py-3 border-b border-border">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-accent-violet grid place-items-center text-xs font-semibold text-white shrink-0">
+                {initials(user.name)}
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-text truncate">{user.name}</div>
+                <div className="text-[11px] text-text-muted truncate">{user.email}</div>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setOpen(false);
+              navigate({ name: 'landing' });
+            }}
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-bg-hover transition"
+          >
+            <UserIcon className="w-4 h-4 text-text-dim" />
+            Home page
+          </button>
+          <button
+            onClick={() => {
+              setOpen(false);
+              signOut();
+              navigate({ name: 'landing' });
+            }}
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-accent-rose hover:bg-accent-rose/10 transition"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
