@@ -27,51 +27,55 @@ export default function Landing() {
           <div className="absolute inset-0 bg-grid-faint bg-[size:32px_32px] opacity-30" />
         </div>
 
-        <section className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 md:pt-28 md:pb-32">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-500/20 bg-brand-500/10 text-xs text-brand-300 font-medium">
-              <Sparkles className="w-3.5 h-3.5" />
-              Never miss a customer's national holiday again
-            </div>
-            <h1 className="mt-5 text-4xl md:text-6xl font-bold tracking-tight text-text">
-              Reach out at the{' '}
-              <span className="bg-gradient-to-r from-brand-400 via-accent-violet to-accent-rose bg-clip-text text-transparent">
-                right moment
-              </span>
-              , every time.
-            </h1>
-            <p className="mt-6 text-lg md:text-xl text-text-muted leading-relaxed max-w-2xl">
-              Holidaze turns your customer list into a living calendar. Add a client, pick their
-              country, and we'll surface every national holiday automatically — so your greetings,
-              campaigns and check-ins always land on the days that matter.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              {user ? (
-                <button onClick={() => navigate({ name: 'dashboard' })} className="btn-primary px-5 py-3 text-base">
-                  Open dashboard <ArrowRight className="w-4 h-4" />
-                </button>
-              ) : (
-                <>
-                  <button onClick={() => navigate({ name: 'signup' })} className="btn-primary px-5 py-3 text-base">
-                    Create free account <ArrowRight className="w-4 h-4" />
+        <section className="relative max-w-6xl mx-auto px-6 pt-16 pb-24 md:pt-24 md:pb-32">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-500/20 bg-brand-500/10 text-xs text-brand-300 font-medium">
+                <Sparkles className="w-3.5 h-3.5" />
+                Never miss a customer's national holiday again
+              </div>
+              <h1 className="mt-5 text-4xl md:text-6xl font-bold tracking-tight text-text">
+                Reach out at the{' '}
+                <span className="bg-gradient-to-r from-brand-400 via-accent-violet to-accent-rose bg-clip-text text-transparent">
+                  right moment
+                </span>
+                , every time.
+              </h1>
+              <p className="mt-6 text-lg md:text-xl text-text-muted leading-relaxed">
+                Holidaze turns your customer list into a living calendar. Add a client, pick their
+                country, and we'll surface every national holiday automatically — so your greetings,
+                campaigns and check-ins always land on the days that matter.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                {user ? (
+                  <button onClick={() => navigate({ name: 'dashboard' })} className="btn-primary px-5 py-3 text-base">
+                    Open dashboard <ArrowRight className="w-4 h-4" />
                   </button>
-                  <button onClick={() => navigate({ name: 'login' })} className="btn-ghost px-5 py-3 text-base">
-                    I already have an account
-                  </button>
-                </>
-              )}
+                ) : (
+                  <>
+                    <button onClick={() => navigate({ name: 'signup' })} className="btn-primary px-5 py-3 text-base">
+                      Create free account <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => navigate({ name: 'login' })} className="btn-ghost px-5 py-3 text-base">
+                      I already have an account
+                    </button>
+                  </>
+                )}
+              </div>
+              <div className="mt-6 flex items-center gap-5 text-xs text-text-dim flex-wrap">
+                <span className="inline-flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-accent-emerald" /> 200+ countries supported
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-accent-emerald" /> Lunar & substitute holidays
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-accent-emerald" /> Your data stays private to you
+                </span>
+              </div>
             </div>
-            <div className="mt-6 flex items-center gap-5 text-xs text-text-dim flex-wrap">
-              <span className="inline-flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-accent-emerald" /> 200+ countries supported
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-accent-emerald" /> Lunar & substitute holidays
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-accent-emerald" /> Your data stays private to you
-              </span>
-            </div>
+
+            <HeroPreview />
           </div>
         </section>
 
@@ -208,6 +212,120 @@ export default function Landing() {
           </span>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function HeroPreview() {
+  const items = [
+    { flag: '🇯🇵', name: 'Akiko Tanaka', country: 'Japan', holiday: "Children's Day", date: 'May 5', days: 11, tone: 'public' },
+    { flag: '🇲🇽', name: 'Diego Morales', country: 'Mexico', holiday: 'Cinco de Mayo', date: 'May 5', days: 11, tone: 'observance' },
+    { flag: '🇮🇳', name: 'Priya Singh', country: 'India', holiday: 'Vesak', date: 'May 23', days: 29, tone: 'religious' },
+    { flag: '🇸🇦', name: 'Omar Al-Rashid', country: 'Saudi Arabia', holiday: 'Eid al-Adha', date: 'Jun 6', days: 43, tone: 'religious' },
+  ] as const;
+
+  const toneClass = (t: string) =>
+    t === 'public'
+      ? 'bg-accent-emerald/15 text-accent-emerald border-accent-emerald/30'
+      : t === 'religious'
+        ? 'bg-accent-violet/15 text-accent-violet border-accent-violet/30'
+        : 'bg-accent-amber/15 text-accent-amber border-accent-amber/30';
+
+  return (
+    <div className="relative">
+      {/* Ambient glow */}
+      <div className="absolute -inset-6 bg-gradient-to-br from-brand-500/15 via-accent-violet/10 to-accent-rose/10 blur-3xl rounded-full pointer-events-none" />
+
+      {/* Floating accent card — top */}
+      <div className="hidden md:flex absolute -top-6 -left-6 z-10 card px-3 py-2.5 items-center gap-2.5 shadow-card rotate-[-3deg]">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-emerald/30 to-accent-emerald/10 border border-accent-emerald/30 grid place-items-center">
+          <Sparkles className="w-4 h-4 text-accent-emerald" />
+        </div>
+        <div className="leading-tight">
+          <div className="text-[10px] uppercase tracking-wider text-text-dim font-semibold">This month</div>
+          <div className="text-sm font-semibold text-text">8 holidays</div>
+        </div>
+      </div>
+
+      {/* Floating accent card — bottom */}
+      <div className="hidden md:flex absolute -bottom-5 -right-4 z-10 card px-3 py-2.5 items-center gap-2.5 shadow-card rotate-[4deg]">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500/30 to-brand-500/10 border border-brand-500/30 grid place-items-center">
+          <Globe2 className="w-4 h-4 text-brand-300" />
+        </div>
+        <div className="leading-tight">
+          <div className="text-[10px] uppercase tracking-wider text-text-dim font-semibold">Countries</div>
+          <div className="text-sm font-semibold text-text">12 active</div>
+        </div>
+      </div>
+
+      {/* Main preview card */}
+      <div className="relative card overflow-hidden shadow-card">
+        {/* Window chrome */}
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-bg-soft/60">
+          <span className="w-2.5 h-2.5 rounded-full bg-accent-rose/50" />
+          <span className="w-2.5 h-2.5 rounded-full bg-accent-amber/50" />
+          <span className="w-2.5 h-2.5 rounded-full bg-accent-emerald/50" />
+          <div className="ml-3 text-[11px] text-text-dim font-mono">holidaze.app/dashboard</div>
+        </div>
+
+        {/* Hero mini — next holiday */}
+        <div className="relative p-5 border-b border-border overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-500/10 via-accent-violet/10 to-transparent pointer-events-none" />
+          <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full bg-brand-500/10 blur-2xl pointer-events-none" />
+          <div className="relative flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-[10px] text-brand-300 font-semibold uppercase tracking-wider">
+                <Sparkles className="w-3 h-3" />
+                Next customer holiday
+              </div>
+              <div className="mt-1.5 text-lg font-semibold text-text truncate">Mei Lin</div>
+              <div className="mt-0.5 text-xs text-text-muted flex items-center gap-1.5 truncate">
+                <span>🇨🇳 China</span>
+                <span className="text-text-dim">·</span>
+                <span className="text-text">Labour Day</span>
+              </div>
+              <div className="mt-1 text-[10px] text-text-dim">Friday, May 1</div>
+            </div>
+            <div className="shrink-0 text-right">
+              <div className="text-[9px] uppercase tracking-wider text-text-dim font-semibold">Days away</div>
+              <div className="mt-0.5 text-3xl font-bold text-text tabular-nums tracking-tight">7</div>
+              <div className="mt-1.5 w-20 h-1 rounded-full bg-bg-soft overflow-hidden ml-auto">
+                <div className="h-full bg-gradient-to-r from-brand-400 to-accent-violet" style={{ width: '76%' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Upcoming list */}
+        <div>
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
+            <div className="text-xs font-semibold text-text">Upcoming</div>
+            <div className="text-[10px] text-text-dim">4 of 23</div>
+          </div>
+          <ul className="divide-y divide-border">
+            {items.map((it, i) => (
+              <li key={i} className="px-4 py-2.5 flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-bg-hover border border-border grid place-items-center text-xs shrink-0">
+                  {it.flag}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-medium text-text truncate">{it.name}</div>
+                  <div className="text-[10px] text-text-muted truncate flex items-center gap-1.5">
+                    <span>{it.holiday}</span>
+                    <span className={`stat-chip border text-[9px] px-1.5 py-0 ${toneClass(it.tone)}`}>
+                      {it.tone}
+                    </span>
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="text-xs font-semibold text-text tabular-nums">{it.days}d</div>
+                  <div className="text-[10px] text-text-dim">{it.date}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
