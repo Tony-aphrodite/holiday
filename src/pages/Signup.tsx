@@ -13,10 +13,10 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const res = signUp(name, email, password);
+    const res = await signUp(name, email, password);
     setBusy(false);
     if (!res.ok) {
       setError(res.error);

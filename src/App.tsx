@@ -15,11 +15,14 @@ import type { CustomerDraft } from './lib/customers';
 
 function AppShell() {
   const { route, navigate } = useRouter();
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
 
   // Guard: if the user is on a protected route without a session, send to login.
   // If they're on an auth/landing route while logged in, send to dashboard.
+  // Wait for the session probe to finish before deciding, otherwise we flash
+  // the wrong page.
   useEffect(() => {
+    if (!ready) return;
     const isProtected =
       route.name === 'dashboard' || route.name === 'customers' || route.name === 'customer';
     const isAuthRoute = route.name === 'login' || route.name === 'signup';
@@ -28,7 +31,15 @@ function AppShell() {
     } else if (user && isAuthRoute) {
       navigate({ name: 'dashboard' });
     }
-  }, [user, route, navigate]);
+  }, [user, ready, route, navigate]);
+
+  if (!ready) {
+    return (
+      <div className="flex h-full items-center justify-center bg-bg">
+        <div className="w-8 h-8 rounded-full border-2 border-border border-t-brand-400 animate-spin" />
+      </div>
+    );
+  }
 
   if (route.name === 'landing') return <Landing />;
   if (route.name === 'login') return user ? <Dashboarded /> : <Login />;
@@ -42,10 +53,10 @@ function Dashboarded() {
   const { addCustomer } = useCustomers();
   const [creating, setCreating] = useState(false);
 
-  function handleCreate(draft: CustomerDraft) {
-    const created = addCustomer(draft);
+  async function handleCreate(draft: CustomerDraft) {
+    const created = await addCustomer(draft);
     setCreating(false);
-    navigate({ name: 'customer', id: created.id });
+    if (created) navigate({ name: 'customer', id: created.id });
   }
 
   return (

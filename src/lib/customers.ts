@@ -13,60 +13,6 @@ export interface Customer {
 
 export type CustomerDraft = Omit<Customer, 'id' | 'createdAt'>;
 
-const LEGACY_KEY = 'holidaze.customers.v1';
-const STORAGE_PREFIX = 'holidaze.customers.v2.';
-
-function keyFor(userId: string): string {
-  return `${STORAGE_PREFIX}${userId}`;
-}
-
-export function loadCustomers(userId: string): Customer[] {
-  try {
-    const raw = localStorage.getItem(keyFor(userId));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed as Customer[];
-  } catch {
-    return [];
-  }
-}
-
-export function saveCustomers(userId: string, list: Customer[]): void {
-  try {
-    localStorage.setItem(keyFor(userId), JSON.stringify(list));
-  } catch {
-    /* ignore quota errors */
-  }
-}
-
-// One-time migration: if the legacy global customer list exists and the
-// current user has no data yet, adopt it. This preserves the original
-// single-user dataset when the owner creates their first account.
-export function migrateLegacyCustomers(userId: string): void {
-  try {
-    const legacy = localStorage.getItem(LEGACY_KEY);
-    if (!legacy) return;
-    if (localStorage.getItem(keyFor(userId))) return;
-    localStorage.setItem(keyFor(userId), legacy);
-    localStorage.removeItem(LEGACY_KEY);
-  } catch {
-    /* ignore */
-  }
-}
-
-export function createCustomer(draft: CustomerDraft): Customer {
-  const id =
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID()
-      : `c_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
-  return {
-    id,
-    createdAt: new Date().toISOString(),
-    ...draft,
-  };
-}
-
 // Deterministic avatar accent derived from name
 export function avatarColor(name: string): { bg: string; fg: string } {
   const palette = [

@@ -11,10 +11,10 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const res = signIn(email, password);
+    const res = await signIn(email, password);
     setBusy(false);
     if (!res.ok) {
       setError(res.error);
