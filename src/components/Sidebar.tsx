@@ -1,7 +1,9 @@
-import { CalendarDays, LayoutDashboard, Users, Settings, Sparkles } from 'lucide-react';
+import { CalendarDays, LayoutDashboard, Users, Settings, Sparkles, MessageSquare } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { useCustomers } from '../lib/CustomersContext';
+import { usePeople } from '../lib/PeopleContext';
 import { useRouter, type Route } from '../lib/router';
+import { initials } from '../lib/customers';
 
 interface NavItem {
   id: string;
@@ -24,6 +26,7 @@ const nav: NavItem[] = [
 
 export default function Sidebar() {
   const { customers } = useCustomers();
+  const { people, loading: peopleLoading } = usePeople();
   const { route, navigate } = useRouter();
 
   function isActive(item: NavItem) {
@@ -31,6 +34,8 @@ export default function Sidebar() {
     if (item.route.name === 'customers') return route.name === 'customers' || route.name === 'customer';
     return false;
   }
+
+  const activeChatPeerId = route.name === 'chat' ? route.peerId : null;
 
   return (
     <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-border bg-bg-soft/60 backdrop-blur">
@@ -47,7 +52,7 @@ export default function Sidebar() {
         </div>
       </button>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         <div className="px-2 pb-2 text-[10px] uppercase tracking-wider text-text-dim font-semibold">
           Workspace
         </div>
@@ -81,6 +86,47 @@ export default function Sidebar() {
             </button>
           );
         })}
+
+        <div className="px-2 pt-5 pb-2 flex items-center justify-between text-[10px] uppercase tracking-wider text-text-dim font-semibold">
+          <span className="flex items-center gap-1.5">
+            <MessageSquare className="w-3 h-3" />
+            People
+          </span>
+          {people.length > 0 && (
+            <span className="normal-case tracking-normal text-text-dim font-medium">
+              {people.length}
+            </span>
+          )}
+        </div>
+
+        {peopleLoading && people.length === 0 ? (
+          <div className="px-3 py-2 text-[11px] text-text-dim">Loading…</div>
+        ) : people.length === 0 ? (
+          <div className="px-3 py-2 text-[11px] text-text-dim leading-relaxed">
+            No other users yet. Invite someone to join Holidaze to start chatting.
+          </div>
+        ) : (
+          people.map((p) => {
+            const active = activeChatPeerId === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => navigate({ name: 'chat', peerId: p.id })}
+                className={cn(
+                  'w-full group flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
+                  active
+                    ? 'bg-brand-500/10 text-text border border-brand-500/20'
+                    : 'text-text-muted hover:text-text hover:bg-bg-hover border border-transparent',
+                )}
+              >
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-brand-400 to-accent-violet grid place-items-center text-[10px] font-semibold text-white shrink-0">
+                  {initials(p.name)}
+                </div>
+                <span className="flex-1 text-left truncate">{p.name}</span>
+              </button>
+            );
+          })
+        )}
       </nav>
 
       <div className="p-3 border-t border-border">

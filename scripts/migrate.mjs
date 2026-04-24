@@ -50,6 +50,16 @@ const statements = [
      created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
    )`,
   `CREATE INDEX IF NOT EXISTS customers_user_idx ON customers (user_id, created_at DESC)`,
+  `CREATE TABLE IF NOT EXISTS messages (
+     id           TEXT PRIMARY KEY,
+     from_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     to_user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     body         TEXT NOT NULL,
+     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+     read_at      TIMESTAMPTZ
+   )`,
+  `CREATE INDEX IF NOT EXISTS messages_thread_idx
+     ON messages (LEAST(from_user_id, to_user_id), GREATEST(from_user_id, to_user_id), created_at)`,
 ];
 
 for (const stmt of statements) {

@@ -8,9 +8,11 @@ import CustomerDetail from './pages/CustomerDetail';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Chat from './pages/Chat';
 import { CustomersProvider, useCustomers } from './lib/CustomersContext';
 import { RouterProvider, useRouter } from './lib/router';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import { PeopleProvider } from './lib/PeopleContext';
 import type { CustomerDraft } from './lib/customers';
 
 function AppShell() {
@@ -24,7 +26,10 @@ function AppShell() {
   useEffect(() => {
     if (!ready) return;
     const isProtected =
-      route.name === 'dashboard' || route.name === 'customers' || route.name === 'customer';
+      route.name === 'dashboard' ||
+      route.name === 'customers' ||
+      route.name === 'customer' ||
+      route.name === 'chat';
     const isAuthRoute = route.name === 'login' || route.name === 'signup';
     if (!user && isProtected) {
       navigate({ name: 'login' });
@@ -72,6 +77,7 @@ function Dashboarded() {
             <Customers onAddCustomer={() => setCreating(true)} />
           )}
           {route.name === 'customer' && <CustomerDetail id={route.id} />}
+          {route.name === 'chat' && <Chat peerId={route.peerId} />}
         </main>
       </div>
 
@@ -90,7 +96,9 @@ export default function App() {
     <AuthProvider>
       <RouterProvider>
         <CustomersProvider>
-          <AppShell />
+          <PeopleProvider>
+            <AppShell />
+          </PeopleProvider>
         </CustomersProvider>
       </RouterProvider>
     </AuthProvider>

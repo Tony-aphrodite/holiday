@@ -17,7 +17,7 @@ try {
 const sql = neon(process.env.DATABASE_URL);
 const deleted = await sql`
   DELETE FROM users
-  WHERE email LIKE 'smoketest+%@example.com' OR email LIKE 'second+%@example.com'
+  WHERE email LIKE 'smoketest%@example.com' OR email LIKE 'second+%@example.com'
   RETURNING email
 `;
 console.log('Deleted:', deleted);

@@ -6,7 +6,8 @@ export type Route =
   | { name: 'signup' }
   | { name: 'dashboard' }
   | { name: 'customers' }
-  | { name: 'customer'; id: string };
+  | { name: 'customer'; id: string }
+  | { name: 'chat'; peerId: string };
 
 interface RouterValue {
   route: Route;
@@ -22,6 +23,7 @@ function parseHash(): Route {
   if (parts[0] === 'customers' && parts[1]) return { name: 'customer', id: parts[1] };
   if (parts[0] === 'customers') return { name: 'customers' };
   if (parts[0] === 'dashboard') return { name: 'dashboard' };
+  if (parts[0] === 'chat' && parts[1]) return { name: 'chat', peerId: parts[1] };
   if (parts[0] === 'login') return { name: 'login' };
   if (parts[0] === 'signup') return { name: 'signup' };
   if (parts[0] === 'home' || parts[0] === 'landing') return { name: 'landing' };
@@ -42,6 +44,8 @@ function serialize(route: Route): string {
       return '#/customers';
     case 'customer':
       return `#/customers/${route.id}`;
+    case 'chat':
+      return `#/chat/${route.peerId}`;
   }
 }
 
