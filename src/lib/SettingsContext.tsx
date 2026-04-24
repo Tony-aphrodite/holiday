@@ -73,6 +73,15 @@ function prettyDatePatternFor(fmt: DateFormat): string {
   return fmt === 'DMY' ? 'D MMM YYYY' : fmt === 'YMD' ? 'YYYY MMM D' : 'MMM D, YYYY';
 }
 
+export type LeadDays = 1 | 3 | 7 | 14 | 30;
+
+export interface EmailPreferences {
+  enabled: boolean;
+  leadDays: LeadDays;
+  sendHour: number; // 0-23 in the user's email timezone
+  timezone: string; // IANA zone
+}
+
 interface SettingsContextValue {
   settings: TimeSettings;
   resolvedTimezone: string;
@@ -80,6 +89,11 @@ interface SettingsContextValue {
   setTimeFormat: (f: TimeFormat) => void;
   setDateFormat: (f: DateFormat) => void;
   reset: () => void;
+  // Email notification preferences (server-backed).
+  emailPrefs: EmailPreferences | null;
+  emailPrefsLoading: boolean;
+  emailPrefsError: string | null;
+  updateEmailPrefs: (patch: Partial<EmailPreferences>) => Promise<{ ok: boolean; error?: string }>;
   // Formatters that honor the user's preferences. Inputs accept ISO strings,
   // Date objects, or anything dayjs() understands.
   formatTime: (input: string | number | Date | dayjs.Dayjs) => string;
@@ -90,10 +104,21 @@ interface SettingsContextValue {
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
+async function parseJson(res: Response): Promise<unknown> {
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const [settings, setSettings] = useState<TimeSettings>(() => loadSettings(userId));
+  const [emailPrefs, setEmailPrefs] = useState<EmailPreferences | null>(null);
+  const [emailPrefsLoading, setEmailPrefsLoading] = useState(false);
+  const [emailPrefsError, setEmailPrefsError] = useState<string | null>(null);
 
   // Reload when auth user changes.
   useEffect(() => {
@@ -108,6 +133,60 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       /* ignore */
     }
   }, [settings, userId]);
+
+  // Load email preferences from the server when the user logs in.
+  useEffect(() => {
+    if (!userId) {
+      setEmailPrefs(null);
+      return;
+    }
+    setEmailPrefsLoading(true);
+    setEmailPrefsError(null);
+    (async () => {
+      try {
+        const res = await fetch('/api/settings/email-preferences', { credentials: 'same-origin' });
+        if (!res.ok) {
+          setEmailPrefs(null);
+          setEmailPrefsError('Could not load email preferences.');
+          return;
+        }
+        const data = (await parseJson(res)) as { preferences?: EmailPreferences } | null;
+        setEmailPrefs(data?.preferences ?? null);
+      } catch {
+        setEmailPrefsError('Network error.');
+      } finally {
+        setEmailPrefsLoading(false);
+      }
+    })();
+  }, [userId]);
+
+  const updateEmailPrefs = useCallback(
+    async (patch: Partial<EmailPreferences>): Promise<{ ok: boolean; error?: string }> => {
+      // Optimistic update
+      const prev = emailPrefs;
+      if (prev) setEmailPrefs({ ...prev, ...patch });
+      try {
+        const res = await fetch('/api/settings/email-preferences', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify(patch),
+        });
+        if (!res.ok) {
+          if (prev) setEmailPrefs(prev);
+          const data = (await parseJson(res)) as { error?: string } | null;
+          return { ok: false, error: data?.error ?? 'Update failed.' };
+        }
+        const data = (await parseJson(res)) as { preferences?: EmailPreferences } | null;
+        if (data?.preferences) setEmailPrefs(data.preferences);
+        return { ok: true };
+      } catch {
+        if (prev) setEmailPrefs(prev);
+        return { ok: false, error: 'Network error.' };
+      }
+    },
+    [emailPrefs],
+  );
 
   const resolvedTimezone = useMemo(() => resolveZone(settings.timezone), [settings.timezone]);
 
@@ -149,12 +228,31 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       setTimeFormat,
       setDateFormat,
       reset,
+      emailPrefs,
+      emailPrefsLoading,
+      emailPrefsError,
+      updateEmailPrefs,
       formatTime,
       formatDate,
       formatDateTime,
       formatPrettyDate,
     }),
-    [settings, resolvedTimezone, setTimezone, setTimeFormat, setDateFormat, reset, formatTime, formatDate, formatDateTime, formatPrettyDate],
+    [
+      settings,
+      resolvedTimezone,
+      setTimezone,
+      setTimeFormat,
+      setDateFormat,
+      reset,
+      emailPrefs,
+      emailPrefsLoading,
+      emailPrefsError,
+      updateEmailPrefs,
+      formatTime,
+      formatDate,
+      formatDateTime,
+      formatPrettyDate,
+    ],
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

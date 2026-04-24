@@ -60,6 +60,20 @@ const statements = [
    )`,
   `CREATE INDEX IF NOT EXISTS messages_thread_idx
      ON messages (LEAST(from_user_id, to_user_id), GREATEST(from_user_id, to_user_id), created_at)`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS email_notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS email_lead_days INT NOT NULL DEFAULT 3`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS email_send_hour INT NOT NULL DEFAULT 9`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS email_timezone TEXT NOT NULL DEFAULT 'UTC'`,
+  `CREATE TABLE IF NOT EXISTS holiday_email_log (
+     id             TEXT PRIMARY KEY,
+     user_id        TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     customer_id    TEXT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+     holiday_date   DATE NOT NULL,
+     holiday_name   TEXT NOT NULL,
+     sent_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+     CONSTRAINT holiday_email_log_unique UNIQUE (user_id, customer_id, holiday_date, holiday_name)
+   )`,
+  `CREATE INDEX IF NOT EXISTS holiday_email_log_user_idx ON holiday_email_log (user_id, sent_at DESC)`,
 ];
 
 for (const stmt of statements) {
