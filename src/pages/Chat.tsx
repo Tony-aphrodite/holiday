@@ -99,12 +99,14 @@ export default function Chat({ peerId }: ChatProps) {
     };
   }, [peerId]);
 
-  // Pusher subscription: listen for new-message events on my inbox channel and
-  // only apply those that belong to the thread with the current peer.
+  // Pusher: listen for new-message events on my inbox channel and only apply
+  // those that belong to the thread with the current peer. The channel is
+  // subscribed app-wide by NotificationsProvider; here we only bind a local
+  // handler and unbind it on unmount so we don't tear down the shared sub.
   useEffect(() => {
     if (!user) return;
     const client = getPusherClient();
-    if (!client) return; // Pusher not configured — polling below still covers us.
+    if (!client) return; // Pusher not configured — polling covers us.
 
     const channel = client.subscribe(userChannel(user.id));
     const handler = (ev: NewMessageEvent) => {
@@ -122,7 +124,6 @@ export default function Chat({ peerId }: ChatProps) {
     channel.bind('new-message', handler);
     return () => {
       channel.unbind('new-message', handler);
-      client.unsubscribe(userChannel(user.id));
     };
   }, [user, peerId]);
 

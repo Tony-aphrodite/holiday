@@ -5,6 +5,52 @@
 @tailwind utilities;
 
 @layer base {
+  /* Default (dark) theme */
+  :root {
+    --color-bg: 11 13 18;
+    --color-bg-soft: 17 20 27;
+    --color-bg-card: 21 25 36;
+    --color-bg-hover: 27 32 48;
+    --color-border: 35 40 54;
+    --color-border-soft: 26 30 42;
+    --color-text: 230 232 236;
+    --color-text-muted: 139 146 167;
+    --color-text-dim: 92 99 119;
+
+    --scroll-track: transparent;
+    --scroll-thumb: 35 40 54;
+    --scroll-thumb-hover: 45 51 72;
+    --scroll-thumb-border: 11 13 18;
+
+    --hero-glow-brand: 67 96 245;
+    --hero-glow-violet: 139 92 246;
+    --hero-glow-opacity-1: 0.12;
+    --hero-glow-opacity-2: 0.08;
+  }
+
+  /* Light theme */
+  :root.light {
+    --color-bg: 247 248 252;
+    --color-bg-soft: 255 255 255;
+    --color-bg-card: 255 255 255;
+    --color-bg-hover: 238 241 247;
+    --color-border: 221 226 235;
+    --color-border-soft: 234 238 244;
+    --color-text: 20 24 34;
+    --color-text-muted: 88 96 117;
+    --color-text-dim: 135 142 162;
+
+    --scroll-track: transparent;
+    --scroll-thumb: 210 216 226;
+    --scroll-thumb-hover: 185 192 206;
+    --scroll-thumb-border: 247 248 252;
+
+    --hero-glow-brand: 67 96 245;
+    --hero-glow-violet: 139 92 246;
+    --hero-glow-opacity-1: 0.08;
+    --hero-glow-opacity-2: 0.05;
+  }
+
   html,
   body,
   #root {
@@ -15,9 +61,18 @@
     @apply bg-bg text-text font-sans antialiased;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     background-image:
-      radial-gradient(1200px 600px at 85% -10%, rgba(67, 96, 245, 0.12), transparent 60%),
-      radial-gradient(900px 500px at -10% 110%, rgba(139, 92, 246, 0.08), transparent 60%);
+      radial-gradient(
+        1200px 600px at 85% -10%,
+        rgb(var(--hero-glow-brand) / var(--hero-glow-opacity-1)),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 500px at -10% 110%,
+        rgb(var(--hero-glow-violet) / var(--hero-glow-opacity-2)),
+        transparent 60%
+      );
     background-attachment: fixed;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   ::-webkit-scrollbar {
@@ -25,15 +80,15 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--scroll-track);
   }
   ::-webkit-scrollbar-thumb {
-    background: #232836;
+    background: rgb(var(--scroll-thumb));
     border-radius: 8px;
-    border: 2px solid #0b0d12;
+    border: 2px solid rgb(var(--scroll-thumb-border));
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #2d3348;
+    background: rgb(var(--scroll-thumb-hover));
   }
 }
 

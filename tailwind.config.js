@@ -5,19 +5,19 @@ export default {
     extend: {
       colors: {
         bg: {
-          DEFAULT: '#0b0d12',
-          soft: '#11141b',
-          card: '#151924',
-          hover: '#1b2030',
+          DEFAULT: 'rgb(var(--color-bg) / <alpha-value>)',
+          soft: 'rgb(var(--color-bg-soft) / <alpha-value>)',
+          card: 'rgb(var(--color-bg-card) / <alpha-value>)',
+          hover: 'rgb(var(--color-bg-hover) / <alpha-value>)',
         },
         border: {
-          DEFAULT: '#232836',
-          soft: '#1a1e2a',
+          DEFAULT: 'rgb(var(--color-border) / <alpha-value>)',
+          soft: 'rgb(var(--color-border-soft) / <alpha-value>)',
         },
         text: {
-          DEFAULT: '#e6e8ec',
-          muted: '#8b92a7',
-          dim: '#5c6377',
+          DEFAULT: 'rgb(var(--color-text) / <alpha-value>)',
+          muted: 'rgb(var(--color-text-muted) / <alpha-value>)',
+          dim: 'rgb(var(--color-text-dim) / <alpha-value>)',
         },
         brand: {
           50: '#eef4ff',
@@ -43,12 +43,12 @@ export default {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        card: '0 1px 0 0 rgba(255,255,255,0.03) inset, 0 8px 24px -12px rgba(0,0,0,0.4)',
+        card: '0 1px 0 0 rgba(255,255,255,0.03) inset, 0 8px 24px -12px rgba(0,0,0,0.25)',
         glow: '0 0 0 1px rgba(67,96,245,0.35), 0 10px 40px -10px rgba(67,96,245,0.35)',
       },
       backgroundImage: {
         'grid-faint':
-          'linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)',
+          'linear-gradient(to right, rgba(128,128,128,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(128,128,128,0.06) 1px, transparent 1px)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

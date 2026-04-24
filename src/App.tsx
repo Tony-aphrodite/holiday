@@ -9,26 +9,26 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Chat from './pages/Chat';
+import People from './pages/People';
 import { CustomersProvider, useCustomers } from './lib/CustomersContext';
 import { RouterProvider, useRouter } from './lib/router';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import { PeopleProvider } from './lib/PeopleContext';
+import { ThemeProvider } from './lib/ThemeContext';
+import { NotificationsProvider } from './lib/NotificationsContext';
 import type { CustomerDraft } from './lib/customers';
 
 function AppShell() {
   const { route, navigate } = useRouter();
   const { user, ready } = useAuth();
 
-  // Guard: if the user is on a protected route without a session, send to login.
-  // If they're on an auth/landing route while logged in, send to dashboard.
-  // Wait for the session probe to finish before deciding, otherwise we flash
-  // the wrong page.
   useEffect(() => {
     if (!ready) return;
     const isProtected =
       route.name === 'dashboard' ||
       route.name === 'customers' ||
       route.name === 'customer' ||
+      route.name === 'people' ||
       route.name === 'chat';
     const isAuthRoute = route.name === 'login' || route.name === 'signup';
     if (!user && isProtected) {
@@ -68,7 +68,7 @@ function Dashboarded() {
     <div className="flex h-full bg-bg">
       <Sidebar />
       <div className="flex-1 min-w-0 flex flex-col">
-        <Topbar onAddCustomer={() => setCreating(true)} />
+        <Topbar />
         <main className="flex-1 overflow-y-auto">
           {route.name === 'dashboard' && (
             <Dashboard onAddCustomer={() => setCreating(true)} />
@@ -77,6 +77,7 @@ function Dashboarded() {
             <Customers onAddCustomer={() => setCreating(true)} />
           )}
           {route.name === 'customer' && <CustomerDetail id={route.id} />}
+          {route.name === 'people' && <People />}
           {route.name === 'chat' && <Chat peerId={route.peerId} />}
         </main>
       </div>
@@ -93,14 +94,18 @@ function Dashboarded() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <RouterProvider>
-        <CustomersProvider>
-          <PeopleProvider>
-            <AppShell />
-          </PeopleProvider>
-        </CustomersProvider>
-      </RouterProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <RouterProvider>
+          <CustomersProvider>
+            <PeopleProvider>
+              <NotificationsProvider>
+                <AppShell />
+              </NotificationsProvider>
+            </PeopleProvider>
+          </CustomersProvider>
+        </RouterProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
