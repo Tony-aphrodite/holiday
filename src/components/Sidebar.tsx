@@ -103,8 +103,21 @@ export default function Sidebar() {
       </nav>
 
       <div className="p-3 border-t border-border">
-        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text hover:bg-bg-hover transition-colors">
-          <Settings className="w-4 h-4 text-text-dim" />
+        <button
+          onClick={() => navigate({ name: 'settings' })}
+          className={cn(
+            'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+            route.name === 'settings'
+              ? 'bg-brand-500/10 text-text border border-brand-500/20'
+              : 'text-text-muted hover:text-text hover:bg-bg-hover border border-transparent',
+          )}
+        >
+          <Settings
+            className={cn(
+              'w-4 h-4',
+              route.name === 'settings' ? 'text-brand-400' : 'text-text-dim',
+            )}
+          />
           Settings
         </button>
         <div className="mt-3 rounded-lg bg-gradient-to-br from-brand-500/10 to-accent-violet/10 border border-brand-500/20 p-3">

@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { Users, Globe2, Calendar, Sparkles, UserPlus, ArrowRight } from 'lucide-react';
 import { useCustomers } from '../lib/CustomersContext';
 import { useRouter } from '../lib/router';
+import { useSettings } from '../lib/SettingsContext';
 import { computeUpcomingCustomerHolidays } from '../lib/aggregate';
 import StatCard from '../components/StatCard';
 import CustomerHolidayRow from '../components/CustomerHolidayRow';
@@ -20,6 +21,7 @@ interface DashboardProps {
 export default function Dashboard({ onAddCustomer }: DashboardProps) {
   const { customers } = useCustomers();
   const { navigate } = useRouter();
+  const { formatPrettyDate } = useSettings();
   const countries = useMemo(() => getCountries(), []);
   const countryByCode = useMemo(
     () => Object.fromEntries(countries.map((c) => [c.code, c])),
@@ -50,7 +52,7 @@ export default function Dashboard({ onAddCustomer }: DashboardProps) {
               : `Tracking ${customers.length} ${customers.length === 1 ? 'customer' : 'customers'} across ${distinctCountries.size} ${distinctCountries.size === 1 ? 'country' : 'countries'}.`}
           </p>
         </div>
-        <div className="text-xs text-text-dim">Updated {today.format('MMM D, YYYY')}</div>
+        <div className="text-xs text-text-dim">Updated {formatPrettyDate(today)}</div>
       </div>
 
       {customers.length === 0 ? (

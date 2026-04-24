@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import dayjs from 'dayjs';
 import {
   Search,
   Bell,
@@ -16,6 +15,7 @@ import { useCustomers } from '../lib/CustomersContext';
 import { useRouter } from '../lib/router';
 import { useAuth } from '../lib/AuthContext';
 import { useTheme } from '../lib/ThemeContext';
+import { useSettings } from '../lib/SettingsContext';
 import { useNotifications, type MessageNotif, type HolidayNotif } from '../lib/NotificationsContext';
 import { getCountries } from '../lib/holidays';
 import { initials } from '../lib/customers';
@@ -61,7 +61,7 @@ export default function Topbar() {
   return (
     <header className="h-16 shrink-0 border-b border-border bg-bg-soft/60 backdrop-blur sticky top-0 z-20">
       <div className="h-full px-4 md:px-6 flex items-center gap-3">
-        <div className="flex-1 max-w-md relative">
+        <div className="flex-1 max-w-[18rem] relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-dim" />
           <input
             id="global-search"
@@ -244,6 +244,7 @@ function MessageRow({
   onOpen: () => void;
   onDismiss: () => void;
 }) {
+  const { formatTime } = useSettings();
   return (
     <div className="relative group hover:bg-bg-hover transition">
       <button onClick={onOpen} className="w-full flex items-start gap-3 px-4 py-3 text-left">
@@ -254,7 +255,7 @@ function MessageRow({
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm font-semibold text-text truncate">{notif.peerName}</div>
             <div className="text-[10px] text-text-dim shrink-0">
-              {dayjs(notif.at).format('HH:mm')}
+              {formatTime(notif.at)}
             </div>
           </div>
           <div className="text-[11px] text-text-muted truncate mt-0.5 flex items-center gap-1.5">
@@ -288,6 +289,7 @@ function HolidayRow({
   onOpen: () => void;
   onDismiss: () => void;
 }) {
+  const { formatDate } = useSettings();
   const when =
     notif.daysUntil === 0
       ? 'Today'
@@ -314,7 +316,7 @@ function HolidayRow({
           </div>
           <div className="text-[11px] text-text-muted truncate mt-0.5 flex items-center gap-1.5">
             <Calendar className="w-3 h-3 shrink-0 text-accent-emerald" />
-            {notif.holidayName} · {dayjs(notif.holidayDate).format('MMM D')}
+            {notif.holidayName} · {formatDate(notif.holidayDate)}
           </div>
         </div>
       </button>

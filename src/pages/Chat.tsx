@@ -4,6 +4,7 @@ import { Send, ArrowLeft, MessageSquare } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { useRouter } from '../lib/router';
 import { usePeople } from '../lib/PeopleContext';
+import { useSettings } from '../lib/SettingsContext';
 import { initials } from '../lib/customers';
 import { getPusherClient, userChannel, type NewMessageEvent } from '../lib/pusher';
 
@@ -41,6 +42,7 @@ export default function Chat({ peerId }: ChatProps) {
   const { user } = useAuth();
   const { navigate } = useRouter();
   const { getById: getPerson } = usePeople();
+  const { formatTime, formatPrettyDate } = useSettings();
 
   const [peer, setPeer] = useState<PeerInfo | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -171,7 +173,7 @@ export default function Chat({ peerId }: ChatProps) {
     el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
-  const grouped = useMemo(() => groupByDay(messages), [messages]);
+  const grouped = useMemo(() => groupByDay(messages, formatPrettyDate), [messages, formatPrettyDate]);
 
   async function send(e?: FormEvent) {
     e?.preventDefault();
@@ -296,7 +298,7 @@ export default function Chat({ peerId }: ChatProps) {
                           mine ? 'text-white/60' : 'text-text-dim'
                         }`}
                       >
-                        {dayjs(m.createdAt).format('HH:mm')}
+                        {formatTime(m.createdAt)}
                       </div>
                     </div>
                   </div>
@@ -340,7 +342,10 @@ export default function Chat({ peerId }: ChatProps) {
   );
 }
 
-function groupByDay(messages: ChatMessage[]) {
+function groupByDay(
+  messages: ChatMessage[],
+  formatPrettyDate: (input: string | number | Date | dayjs.Dayjs) => string,
+) {
   const today = dayjs().startOf('day');
   const yesterday = today.subtract(1, 'day');
   const groups: { day: string; dayLabel: string; items: ChatMessage[] }[] = [];
@@ -351,7 +356,7 @@ function groupByDay(messages: ChatMessage[]) {
     let label: string;
     if (d.isSame(today)) label = 'Today';
     else if (d.isSame(yesterday)) label = 'Yesterday';
-    else label = d.format('MMM D, YYYY');
+    else label = formatPrettyDate(m.createdAt);
     const last = groups[groups.length - 1];
     if (last && last.day === key) {
       last.items.push(m);

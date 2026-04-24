@@ -10,11 +10,13 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Chat from './pages/Chat';
 import People from './pages/People';
+import Settings from './pages/Settings';
 import { CustomersProvider, useCustomers } from './lib/CustomersContext';
 import { RouterProvider, useRouter } from './lib/router';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import { PeopleProvider } from './lib/PeopleContext';
 import { ThemeProvider } from './lib/ThemeContext';
+import { SettingsProvider } from './lib/SettingsContext';
 import { NotificationsProvider } from './lib/NotificationsContext';
 import type { CustomerDraft } from './lib/customers';
 
@@ -29,7 +31,8 @@ function AppShell() {
       route.name === 'customers' ||
       route.name === 'customer' ||
       route.name === 'people' ||
-      route.name === 'chat';
+      route.name === 'chat' ||
+      route.name === 'settings';
     const isAuthRoute = route.name === 'login' || route.name === 'signup';
     if (!user && isProtected) {
       navigate({ name: 'login' });
@@ -79,6 +82,7 @@ function Dashboarded() {
           {route.name === 'customer' && <CustomerDetail id={route.id} />}
           {route.name === 'people' && <People />}
           {route.name === 'chat' && <Chat peerId={route.peerId} />}
+          {route.name === 'settings' && <Settings />}
         </main>
       </div>
 
@@ -96,15 +100,17 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <RouterProvider>
-          <CustomersProvider>
-            <PeopleProvider>
-              <NotificationsProvider>
-                <AppShell />
-              </NotificationsProvider>
-            </PeopleProvider>
-          </CustomersProvider>
-        </RouterProvider>
+        <SettingsProvider>
+          <RouterProvider>
+            <CustomersProvider>
+              <PeopleProvider>
+                <NotificationsProvider>
+                  <AppShell />
+                </NotificationsProvider>
+              </PeopleProvider>
+            </CustomersProvider>
+          </RouterProvider>
+        </SettingsProvider>
       </AuthProvider>
     </ThemeProvider>
   );
