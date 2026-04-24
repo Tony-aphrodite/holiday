@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, newId } from '../_lib/db.js';
 import { requireSession } from '../_lib/session.js';
 import { trimString } from '../_lib/validation.js';
+import { getPusher, userChannel } from '../_lib/pusher.js';
 
 interface MessageRow {
   id: string;
@@ -100,15 +101,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     `) as MessageRow[];
 
     const m = rows[0];
-    res.status(201).json({
-      message: {
-        id: m.id,
-        fromUserId: m.from_user_id,
-        toUserId: m.to_user_id,
-        body: m.body,
-        createdAt: m.created_at,
-      },
-    });
+    const payload = {
+      id: m.id,
+      fromUserId: m.from_user_id,
+      toUserId: m.to_user_id,
+      body: m.body,
+      createdAt: m.created_at,
+    };
+
+    // Fire the realtime event. We push to both participants' inboxes so that
+    // the sender's other open tabs/devices also receive the message and stay
+    // in sync. Failures here must not fail the HTTP request — the message is
+    // already persisted and clients will pick it up on next poll/refetch.
+    const pusher = getPusher();
+    if (pusher) {
+      try {
+        await pusher.triggerBatch([
+          { channel: userChannel(otherId), name: 'new-message', data: payload },
+          { channel: userChannel(session.userId), name: 'new-message', data: payload },
+        ]);
+      } catch (err) {
+        console.error('Pusher publish failed:', err);
+      }
+    }
+
+    res.status(201).json({ message: payload });
     return;
   }
 

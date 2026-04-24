@@ -5,6 +5,7 @@ import { useAuth } from '../lib/AuthContext';
 import { useRouter } from '../lib/router';
 import { usePeople } from '../lib/PeopleContext';
 import { initials } from '../lib/customers';
+import { getPusherClient, userChannel, type NewMessageEvent } from '../lib/pusher';
 
 interface ChatMessage {
   id: string;
@@ -24,7 +25,9 @@ interface ChatProps {
   peerId: string;
 }
 
-const POLL_MS = 4000;
+// Realtime comes from Pusher; we keep a slow poll as a safety net for
+// missed events during reconnects or if Pusher isn't configured.
+const POLL_MS = 30_000;
 
 async function parseJson(res: Response): Promise<unknown> {
   try {
@@ -50,8 +53,6 @@ export default function Chat({ peerId }: ChatProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastSeenRef = useRef<string | null>(null);
-  const messagesRef = useRef<ChatMessage[]>([]);
-  messagesRef.current = messages;
 
   // Optimistic prefill peer info from the sidebar list so the header doesn't flash.
   useEffect(() => {
@@ -98,7 +99,35 @@ export default function Chat({ peerId }: ChatProps) {
     };
   }, [peerId]);
 
-  // Poll for new messages while the page is open and visible.
+  // Pusher subscription: listen for new-message events on my inbox channel and
+  // only apply those that belong to the thread with the current peer.
+  useEffect(() => {
+    if (!user) return;
+    const client = getPusherClient();
+    if (!client) return; // Pusher not configured — polling below still covers us.
+
+    const channel = client.subscribe(userChannel(user.id));
+    const handler = (ev: NewMessageEvent) => {
+      const inThisThread =
+        (ev.fromUserId === user.id && ev.toUserId === peerId) ||
+        (ev.fromUserId === peerId && ev.toUserId === user.id);
+      if (!inThisThread) return;
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === ev.id)) return prev;
+        const next = [...prev, ev];
+        lastSeenRef.current = ev.createdAt;
+        return next;
+      });
+    };
+    channel.bind('new-message', handler);
+    return () => {
+      channel.unbind('new-message', handler);
+      client.unsubscribe(userChannel(user.id));
+    };
+  }, [user, peerId]);
+
+  // Safety-net poll for missed events (reconnects, Pusher outage, or when
+  // Pusher env is not configured locally).
   useEffect(() => {
     let cancelled = false;
 
