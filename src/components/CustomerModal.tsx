@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { X, User, Mail, MessageCircle, Phone, Building2, StickyNote, Trash2 } from 'lucide-react';
+import { X, User, Mail, MessageCircle, Phone, Building2, StickyNote, Trash2, Briefcase, DollarSign } from 'lucide-react';
 import type { Customer, CustomerDraft } from '../lib/customers';
+import { COMMON_CURRENCIES } from '../lib/customers';
 import CountrySelect from './CountrySelect';
 
 interface CustomerModalProps {
@@ -20,6 +21,9 @@ const EMPTY: CustomerDraft = {
   phone: '',
   company: '',
   notes: '',
+  projectsCompleted: 0,
+  totalRevenue: 0,
+  currency: 'USD',
 };
 
 export default function CustomerModal({
@@ -44,6 +48,9 @@ export default function CustomerModal({
         phone: initial.phone ?? '',
         company: initial.company ?? '',
         notes: initial.notes ?? '',
+        projectsCompleted: initial.projectsCompleted ?? 0,
+        totalRevenue: initial.totalRevenue ?? 0,
+        currency: initial.currency ?? 'USD',
       });
     } else {
       setDraft(EMPTY);
@@ -85,6 +92,9 @@ export default function CustomerModal({
       phone: draft.phone?.trim() || undefined,
       company: draft.company?.trim() || undefined,
       notes: draft.notes?.trim() || undefined,
+      projectsCompleted: Math.max(0, Math.floor(Number(draft.projectsCompleted) || 0)),
+      totalRevenue: Math.max(0, Number(draft.totalRevenue) || 0),
+      currency: draft.currency || 'USD',
     });
   }
 
@@ -194,6 +204,59 @@ export default function CustomerModal({
                     value={draft.company}
                     onChange={(e) => set('company', e.target.value)}
                   />
+                }
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Field
+                label="Projects done"
+                icon={Briefcase}
+                input={
+                  <input
+                    className="input w-full tabular-nums"
+                    type="number"
+                    min={0}
+                    step={1}
+                    placeholder="0"
+                    value={String(draft.projectsCompleted ?? 0)}
+                    onChange={(e) =>
+                      set('projectsCompleted', Math.max(0, parseInt(e.target.value, 10) || 0))
+                    }
+                  />
+                }
+              />
+              <Field
+                label="Total revenue"
+                icon={DollarSign}
+                input={
+                  <input
+                    className="input w-full tabular-nums"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    placeholder="0.00"
+                    value={String(draft.totalRevenue ?? 0)}
+                    onChange={(e) =>
+                      set('totalRevenue', Math.max(0, parseFloat(e.target.value) || 0))
+                    }
+                  />
+                }
+              />
+              <Field
+                label="Currency"
+                input={
+                  <select
+                    className="input w-full"
+                    value={draft.currency ?? 'USD'}
+                    onChange={(e) => set('currency', e.target.value)}
+                  >
+                    {COMMON_CURRENCIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.code} · {c.symbol}
+                      </option>
+                    ))}
+                  </select>
                 }
               />
             </div>

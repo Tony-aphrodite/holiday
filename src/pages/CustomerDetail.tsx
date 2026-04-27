@@ -12,6 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   StickyNote,
+  Briefcase,
+  DollarSign,
 } from 'lucide-react';
 import { useCustomers } from '../lib/CustomersContext';
 import { useRouter } from '../lib/router';
@@ -24,6 +26,7 @@ import DayDetails from '../components/DayDetails';
 import StatCard from '../components/StatCard';
 import CustomerModal from '../components/CustomerModal';
 import type { CustomerDraft } from '../lib/customers';
+import { formatMoney } from '../lib/customers';
 import { cn } from '../lib/cn';
 
 interface CustomerDetailProps {
@@ -202,7 +205,7 @@ export default function CustomerDetail({ id }: CustomerDetailProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <StatCard
           label="Total holidays"
           value={holidays.length}
@@ -230,6 +233,20 @@ export default function CustomerDetail({ id }: CustomerDetailProps) {
           hint="Distinct categories"
           icon={CalendarDays}
           accent="emerald"
+        />
+        <StatCard
+          label="Projects done"
+          value={customer.projectsCompleted ?? 0}
+          hint="Completed with this customer"
+          icon={Briefcase}
+          accent="sky"
+        />
+        <StatCard
+          label="Revenue"
+          value={formatMoney(customer.totalRevenue ?? 0, customer.currency ?? 'USD')}
+          hint={`Total earned · ${customer.currency ?? 'USD'}`}
+          icon={DollarSign}
+          accent="amber"
         />
       </div>
 

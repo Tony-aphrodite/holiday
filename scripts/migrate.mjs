@@ -74,6 +74,9 @@ const statements = [
      CONSTRAINT holiday_email_log_unique UNIQUE (user_id, customer_id, holiday_date, holiday_name)
    )`,
   `CREATE INDEX IF NOT EXISTS holiday_email_log_user_idx ON holiday_email_log (user_id, sent_at DESC)`,
+  `ALTER TABLE customers ADD COLUMN IF NOT EXISTS projects_completed INT NOT NULL DEFAULT 0`,
+  `ALTER TABLE customers ADD COLUMN IF NOT EXISTS total_revenue NUMERIC(14, 2) NOT NULL DEFAULT 0`,
+  `ALTER TABLE customers ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'USD'`,
 ];
 
 for (const stmt of statements) {

@@ -27,6 +27,11 @@ export interface CustomerRow {
   company: string | null;
   notes: string | null;
   tags: string[];
+  // Postgres NUMERIC values come back as strings via the Neon driver, so we
+  // accept either string or number here and convert in the DTO layer.
+  projects_completed: number | string;
+  total_revenue: number | string;
+  currency: string;
   created_at: string;
 }
 

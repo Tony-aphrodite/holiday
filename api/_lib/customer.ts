@@ -10,7 +10,19 @@ export interface CustomerDTO {
   company?: string;
   notes?: string;
   tags?: string[];
+  projectsCompleted: number;
+  totalRevenue: number;
+  currency: string;
   createdAt: string;
+}
+
+function toNumber(v: unknown, fallback = 0): number {
+  if (typeof v === 'number') return v;
+  if (typeof v === 'string') {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : fallback;
+  }
+  return fallback;
 }
 
 export function rowToDTO(r: CustomerRow): CustomerDTO {
@@ -18,6 +30,9 @@ export function rowToDTO(r: CustomerRow): CustomerDTO {
     id: r.id,
     name: r.name,
     countryCode: r.country_code,
+    projectsCompleted: toNumber(r.projects_completed, 0),
+    totalRevenue: toNumber(r.total_revenue, 0),
+    currency: r.currency ?? 'USD',
     createdAt: r.created_at,
   };
   if (r.email) dto.email = r.email;
