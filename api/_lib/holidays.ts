@@ -3,8 +3,9 @@
 import Holidays from 'date-holidays';
 
 export interface RawHoliday {
-  date: string; // YYYY-MM-DD (date only)
-  name: string;
+  date: string;        // YYYY-MM-DD (date only)
+  name: string;        // English (or primary)
+  nameLocal?: string;  // Native, if it differs
   type: string;
 }
 
@@ -43,18 +44,41 @@ function dateOnly(d: Date | string): string {
 
 export function holidaysForCountry(countryCode: string, year: number): RawHoliday[] {
   try {
-    const hd = new Holidays(countryCode);
-    const raw = (hd.getHolidays(year) ?? []) as Array<{
+    // Two separate instances avoid date-holidays' language caching, which
+    // otherwise makes the no-arg call return whatever language was used last.
+    const hdNative = new Holidays(countryCode);
+    const nativeRaw = (hdNative.getHolidays(year) ?? []) as Array<{
       date: string;
       name: string;
       type?: string;
+      rule?: string;
     }>;
-    return raw
-      .map((h) => ({
-        date: dateOnly(h.date),
-        name: h.name,
-        type: h.type ?? 'public',
-      }))
+    const hdEn = new Holidays(countryCode);
+    const englishRaw = (hdEn.getHolidays(year, 'en') ?? []) as Array<{
+      date: string;
+      name: string;
+      type?: string;
+      rule?: string;
+    }>;
+
+    const nativeByKey = new Map<string, string>();
+    for (const h of nativeRaw) {
+      const key = `${h.date}|${h.rule ?? ''}|${h.type ?? ''}`;
+      nativeByKey.set(key, h.name);
+    }
+
+    return englishRaw
+      .map((h) => {
+        const key = `${h.date}|${h.rule ?? ''}|${h.type ?? ''}`;
+        const native = nativeByKey.get(key);
+        const out: RawHoliday = {
+          date: dateOnly(h.date),
+          name: h.name,
+          type: h.type ?? 'public',
+        };
+        if (native && native !== h.name) out.nameLocal = native;
+        return out;
+      })
       .sort((a, b) => a.date.localeCompare(b.date));
   } catch {
     return [];

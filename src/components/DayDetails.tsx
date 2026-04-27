@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { X, MapPin } from 'lucide-react';
 import type { Holiday, CountryOption } from '../lib/holidays';
-import { holidayTypeColor, holidayTypeDot } from '../lib/holidays';
+import { holidayTypeColor, holidayTypeDot, holidayDisplayName } from '../lib/holidays';
 import { cn } from '../lib/cn';
 
 interface DayDetailsProps {
@@ -68,7 +68,7 @@ export default function DayDetails({ date, holidays, country, onClose }: DayDeta
                   className={cn('mt-1.5 w-1.5 h-1.5 rounded-full shrink-0', holidayTypeDot(h.type))}
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-text">{h.name}</div>
+                  <div className="text-sm font-medium text-text">{holidayDisplayName(h)}</div>
                   <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                     <span
                       className={cn(

@@ -11,7 +11,7 @@ import CustomerCard from '../components/CustomerCard';
 import CountryBreakdown from '../components/CountryBreakdown';
 import EmptyState from '../components/EmptyState';
 import { holidayTypeColor } from '../lib/holidays';
-import { getCountries } from '../lib/holidays';
+import { getCountries, holidayDisplayName } from '../lib/holidays';
 import { cn } from '../lib/cn';
 
 interface DashboardProps {
@@ -263,7 +263,7 @@ function NextCustomerHero({ item, countryName, countryFlag, onOpen }: NextCustom
               {countryFlag} {countryName}
             </span>
             <span className="text-text-dim">·</span>
-            <span className="text-text font-medium">{item.holiday.name}</span>
+            <span className="text-text font-medium">{holidayDisplayName(item.holiday)}</span>
             <span
               className={cn(
                 'stat-chip border capitalize',

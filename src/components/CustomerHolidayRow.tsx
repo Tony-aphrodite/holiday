@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import type { CustomerHoliday } from '../lib/aggregate';
-import { holidayTypeColor, holidayTypeDot } from '../lib/holidays';
+import { holidayTypeColor, holidayTypeDot, holidayDisplayName } from '../lib/holidays';
 import { cn } from '../lib/cn';
 import Avatar from './Avatar';
 import { getCountries } from '../lib/holidays';
@@ -45,7 +45,7 @@ export default function CustomerHolidayRow({ item, onClick }: CustomerHolidayRow
         </div>
         <div className="mt-1 flex items-center gap-2 text-xs text-text-muted min-w-0">
           <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', holidayTypeDot(item.holiday.type))} />
-          <span className="truncate">{item.holiday.name}</span>
+          <span className="truncate">{holidayDisplayName(item.holiday)}</span>
           <span
             className={cn(
               'stat-chip border capitalize shrink-0',

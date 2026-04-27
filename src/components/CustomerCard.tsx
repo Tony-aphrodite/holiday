@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import dayjs from 'dayjs';
 import { Mail, MessageCircle, Phone, CalendarDays, ArrowUpRight } from 'lucide-react';
 import type { Customer } from '../lib/customers';
-import { getCountries } from '../lib/holidays';
+import { getCountries, holidayDisplayName } from '../lib/holidays';
 import { nextHolidayForCustomer } from '../lib/aggregate';
 import Avatar from './Avatar';
 
@@ -70,7 +70,7 @@ export default function CustomerCard({ customer, onOpen }: CustomerCardProps) {
               <div className="text-[10px] uppercase tracking-wider text-text-dim font-semibold">
                 Next holiday
               </div>
-              <div className="text-xs text-text truncate font-medium">{next.holiday.name}</div>
+              <div className="text-xs text-text truncate font-medium">{holidayDisplayName(next.holiday)}</div>
             </div>
             <div className="text-right shrink-0">
               <div className="text-sm font-semibold text-text tabular-nums">

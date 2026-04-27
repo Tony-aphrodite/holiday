@@ -5,10 +5,16 @@ export type HolidayType = 'public' | 'bank' | 'school' | 'optional' | 'observanc
 
 export interface Holiday {
   date: string; // YYYY-MM-DD
-  name: string;
+  name: string;       // English (or the country's primary localized name)
+  nameLocal?: string; // Country's native-language name, if it differs from `name`
   type: HolidayType;
   rule?: string;
   note?: string;
+}
+
+/** "English Name (Native Name)" if both differ, otherwise just the name. */
+export function holidayDisplayName(h: { name: string; nameLocal?: string }): string {
+  return h.nameLocal && h.nameLocal !== h.name ? `${h.name} (${h.nameLocal})` : h.name;
 }
 
 export interface CountryOption {
@@ -34,16 +40,35 @@ export function getCountries(): CountryOption[] {
 }
 
 export function getHolidaysForYear(countryCode: string, year: number): Holiday[] {
-  const hd = new Holidays(countryCode);
-  const raw = hd.getHolidays(year) ?? [];
-  return raw
-    .map((h: any) => ({
-      date: dayjs(h.date).format('YYYY-MM-DD'),
-      name: h.name as string,
-      type: (h.type as HolidayType) ?? 'public',
-      rule: h.rule as string | undefined,
-      note: h.note as string | undefined,
-    }))
+  // Use two separate instances — date-holidays caches the last language on
+  // a Holidays instance, so calling getHolidays(year, 'en') and then
+  // getHolidays(year) returns the same English names. Fresh instances avoid
+  // that contamination.
+  const hdNative = new Holidays(countryCode);
+  const nativeRaw = hdNative.getHolidays(year) ?? [];
+  const hdEn = new Holidays(countryCode);
+  const englishRaw = hdEn.getHolidays(year, 'en') ?? [];
+
+  const nativeByKey = new Map<string, string>();
+  for (const h of nativeRaw as any[]) {
+    const key = `${h.date}|${h.rule ?? ''}|${h.type ?? ''}`;
+    nativeByKey.set(key, h.name as string);
+  }
+
+  return (englishRaw as any[])
+    .map((h) => {
+      const key = `${h.date}|${h.rule ?? ''}|${h.type ?? ''}`;
+      const englishName = h.name as string;
+      const native = nativeByKey.get(key);
+      return {
+        date: dayjs(h.date).format('YYYY-MM-DD'),
+        name: englishName,
+        nameLocal: native && native !== englishName ? native : undefined,
+        type: (h.type as HolidayType) ?? 'public',
+        rule: h.rule as string | undefined,
+        note: h.note as string | undefined,
+      };
+    })
     .sort((a: Holiday, b: Holiday) => a.date.localeCompare(b.date));
 }
 

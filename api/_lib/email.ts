@@ -20,8 +20,9 @@ export interface HolidayForEmail {
   customerName: string;
   countryName: string;
   flag: string;
-  holidayName: string;
-  holidayDate: string; // ISO YYYY-MM-DD
+  holidayName: string;        // English (primary)
+  holidayNameLocal?: string;  // Native (in parentheses), if different
+  holidayDate: string;        // ISO YYYY-MM-DD
   daysUntil: number;
   type: string;
 }
@@ -56,9 +57,13 @@ export function renderHolidayEmail(
   tz: string,
 ): { subject: string; html: string; text: string } {
   const count = holidays.length;
+  const firstHoliday = holidays[0];
+  const firstName = firstHoliday.holidayNameLocal
+    ? `${firstHoliday.holidayName} (${firstHoliday.holidayNameLocal})`
+    : firstHoliday.holidayName;
   const subject =
     count === 1
-      ? `Upcoming holiday: ${holidays[0].holidayName} for ${holidays[0].customerName}`
+      ? `Upcoming holiday: ${firstName} for ${firstHoliday.customerName}`
       : `${count} upcoming customer holidays`;
 
   const rows = holidays
@@ -80,7 +85,13 @@ export function renderHolidayEmail(
             </div>
           </td>
           <td style="padding:14px 16px;border-bottom:1px solid #e5e7eb;vertical-align:top;">
-            <div style="font-size:14px;color:#111827;">${escapeHtml(h.holidayName)}</div>
+            <div style="font-size:14px;color:#111827;">
+              ${escapeHtml(h.holidayName)}${
+                h.holidayNameLocal && h.holidayNameLocal !== h.holidayName
+                  ? ` <span style="color:#6b7280;font-weight:400;">(${escapeHtml(h.holidayNameLocal)})</span>`
+                  : ''
+              }
+            </div>
             <div style="font-size:12px;color:#6b7280;margin-top:2px;">
               ${escapeHtml(formatDate(h.holidayDate, tz))}
             </div>
@@ -145,7 +156,11 @@ export function renderHolidayEmail(
     ...holidays.map((h) => {
       const when =
         h.daysUntil === 0 ? 'Today' : h.daysUntil === 1 ? 'Tomorrow' : `In ${h.daysUntil} days`;
-      return `- ${h.customerName} (${h.countryName}) — ${h.holidayName} — ${formatDate(h.holidayDate, tz)} — ${when}`;
+      const holidayLabel =
+        h.holidayNameLocal && h.holidayNameLocal !== h.holidayName
+          ? `${h.holidayName} (${h.holidayNameLocal})`
+          : h.holidayName;
+      return `- ${h.customerName} (${h.countryName}) — ${holidayLabel} — ${formatDate(h.holidayDate, tz)} — ${when}`;
     }),
     '',
     'Manage your notification settings: https://holiday-teal.vercel.app/#/settings',

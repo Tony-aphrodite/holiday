@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useCustomers } from '../lib/CustomersContext';
 import { useRouter } from '../lib/router';
-import { getCountries, getHolidaysForYear, getUpcoming, getNext, daysUntil } from '../lib/holidays';
+import { getCountries, getHolidaysForYear, getUpcoming, getNext, daysUntil, holidayDisplayName } from '../lib/holidays';
 import { holidayTypeColor } from '../lib/holidays';
 import Avatar from '../components/Avatar';
 import Calendar from '../components/Calendar';
@@ -186,8 +186,13 @@ export default function CustomerDetail({ id }: CustomerDetailProps) {
               <div className="text-[10px] uppercase tracking-wider text-text-dim font-semibold">
                 Next holiday
               </div>
-              <div className="mt-1 text-lg font-semibold text-text tracking-tight max-w-[200px] text-right">
+              <div className="mt-1 text-lg font-semibold text-text tracking-tight max-w-[220px] text-right break-words">
                 {next.name}
+                {next.nameLocal && next.nameLocal !== next.name && (
+                  <div className="text-xs font-normal text-text-muted mt-0.5">
+                    ({next.nameLocal})
+                  </div>
+                )}
               </div>
               <div className="mt-1 text-xs text-text-muted">
                 {dayjs(next.date).format('MMM D, YYYY')}
@@ -300,7 +305,7 @@ export default function CustomerDetail({ id }: CustomerDetailProps) {
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-text truncate">{h.name}</div>
+                          <div className="text-sm font-medium text-text truncate">{holidayDisplayName(h)}</div>
                           <div className="mt-0.5">
                             <span
                               className={cn(

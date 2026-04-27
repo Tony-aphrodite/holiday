@@ -106,6 +106,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       customer: CustomerRow;
       holidayDate: string;
       holidayName: string;
+      holidayNameLocal?: string;
       holidayType: string;
     }> = [];
 
@@ -118,6 +119,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             customer: c,
             holidayDate: h.date,
             holidayName: h.name,
+            holidayNameLocal: h.nameLocal,
             holidayType: h.type,
           });
         }
@@ -152,15 +154,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       continue;
     }
 
-    const payload: HolidayForEmail[] = dedupedMatches.map((m) => ({
-      customerName: m.customer.name,
-      countryName: countryName(m.customer.country_code),
-      flag: flagFromCode(m.customer.country_code),
-      holidayName: m.holidayName,
-      holidayDate: m.holidayDate,
-      daysUntil: diffDays(today, m.holidayDate),
-      type: m.holidayType,
-    }));
+    const payload: HolidayForEmail[] = dedupedMatches.map((m) => {
+      const item: HolidayForEmail = {
+        customerName: m.customer.name,
+        countryName: countryName(m.customer.country_code),
+        flag: flagFromCode(m.customer.country_code),
+        holidayName: m.holidayName,
+        holidayDate: m.holidayDate,
+        daysUntil: diffDays(today, m.holidayDate),
+        type: m.holidayType,
+      };
+      if (m.holidayNameLocal) item.holidayNameLocal = m.holidayNameLocal;
+      return item;
+    });
 
     if (dryRun) {
       report.push({

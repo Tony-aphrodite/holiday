@@ -21,7 +21,8 @@ export interface HolidayNotif {
   id: string;
   customerId: string;
   customerName: string;
-  holidayName: string;
+  holidayName: string;       // English (or primary)
+  holidayNameLocal?: string; // Native, if different
   holidayDate: string;
   flag: string;
   daysUntil: number;
@@ -166,6 +167,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         customerId: u.customer.id,
         customerName: u.customer.name,
         holidayName: u.holiday.name,
+        holidayNameLocal: u.holiday.nameLocal,
         holidayDate: u.holiday.date,
         flag: countryByCode[u.customer.countryCode]?.flag ?? '🏳️',
         daysUntil: u.daysUntil,

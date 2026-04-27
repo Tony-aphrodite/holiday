@@ -316,7 +316,14 @@ function HolidayRow({
           </div>
           <div className="text-[11px] text-text-muted truncate mt-0.5 flex items-center gap-1.5">
             <Calendar className="w-3 h-3 shrink-0 text-accent-emerald" />
-            {notif.holidayName} · {formatDate(notif.holidayDate)}
+            <span className="truncate">
+              {notif.holidayName}
+              {notif.holidayNameLocal && notif.holidayNameLocal !== notif.holidayName && (
+                <span className="text-text-dim"> ({notif.holidayNameLocal})</span>
+              )}
+              {' · '}
+              {formatDate(notif.holidayDate)}
+            </span>
           </div>
         </div>
       </button>
